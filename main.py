@@ -32,4 +32,7 @@ if option:
             case "FT-006":
                 df = huafeng.read_csv(uploaded_files)
         
-        st.write(df)
+        if df is None:
+            st.error('读取文件', icon="🚨")
+        else:
+            st.write(df)

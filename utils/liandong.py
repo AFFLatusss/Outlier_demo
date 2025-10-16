@@ -30,7 +30,18 @@ def read_csv(uploaded_file):
     basic_df = df.iloc[:,:7]
     detail_df = df.iloc[:,index_pos:]
 
-    product_name = "LCG15FF120E4B1-01"
+    try:
+
+        url = "http://10.168.4.51:8000/mssql/get_product_name"
+        params = {"circulate_no": circulate_no}  # Query parameters
+
+        response = requests.get(url, params=params)
+        product_name = response.text.strip()
+        if not product_name:
+            raise Exception("Product name not found")
+    except Exception as e:
+        return None
+
     # The criteria for identifying outliers
     criteria = helper.criteria[product_name]
 
