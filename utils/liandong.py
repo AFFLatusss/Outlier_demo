@@ -36,7 +36,7 @@ def read_csv(uploaded_file):
         params = {"circulate_no": circulate_no}  # Query parameters
 
         response = requests.get(url, params=params)
-        product_name = response.text.strip()
+        product_name = response.text.strip('"')
         if not product_name:
             raise Exception("Product name not found")
     except Exception as e:
