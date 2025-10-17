@@ -13,7 +13,7 @@ def read_csv(uploaded_file):
                 skip = rownum
             elif line.startswith("SITE_NUM,PART_ID,PASSFG,SOFT_BIN"):
                 # raise Exception("Incorrect data format. Not SPEA-like. Header starts with [SITE_NUM,PART_ID,PASSFG,SOFT_BIN], should be [Article_Nr.,Date,Time]")
-                raise Exception("错误的数据格式！不符合SPEA格式标准。正确表头应该是[Article_Nr.,Date,Time]。。。等")
+                return None,  "错误的数据格式！不符合SPEA格式标准。正确表头应该是[Article_Nr.,Date,Time]....等"
 
 
     file_name = uploaded_file.name.replace("_"," ").split(" ")
@@ -22,7 +22,7 @@ def read_csv(uploaded_file):
 
 
     # df = pd.read_csv(uploaded_file, encoding=encoding, header=0).rename(columns={"Device_ID.": "device_id"})
-    df = pd.read_csv(uploaded_file, encoding=encoding, header=0)
+    df = pd.read_csv(uploaded_file, encoding=encoding, header=0, skiprows=skip)
     df = df.iloc[3:, :]  #Remove unit and UL limit
     df = df[df["PassFail"] == "Pass"] #Remove fail rows
 
@@ -36,13 +36,6 @@ def read_csv(uploaded_file):
         return df, "未找到DC_NTC_TEST列，请检查上传的文件！"
     
     index_pos = df.columns.get_loc(index_cols[-1])
-
-
-    # check ntc avg
-    ntc_avg = pd.to_numeric(df.iloc[:,index_pos], errors='coerce').mean()
-    if ntc_avg <= 4000:
-        return df, "未找到常温测试数据，请检查"
-
 
         
     # Splitting the DataFrame
