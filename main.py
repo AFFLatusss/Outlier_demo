@@ -5,11 +5,13 @@ from utils import huafeng, liandong, spea
 
 # ===========================================================================================
 
-st.title('离散点检测DEMO')
+st.title('离散点/并联检测 DEMO')
 
 option = st.selectbox(
     "选择测试设备",
     ("FT-001", "FT-002", "FT-003","FT-006"),
+    index=None,
+    placeholder="设备",
 )
 
 selection = st.segmented_control(
