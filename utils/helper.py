@@ -40,7 +40,7 @@ def calc_outlier(basic_df, detail_df, circulate_no):
         response.raise_for_status()
         product_name = response.text.strip().strip('"')
         if not product_name:
-            return None, "接口返回为空，请检查流转单号或后台接口！"
+            return None, f"无法找到流转单{circulate_no}对应的产品编码，请检查流转单号和文件命名！"
     except requests.RequestException:
         return None, "无法连接数据库接口，请检查网络或服务器状态！"
 
