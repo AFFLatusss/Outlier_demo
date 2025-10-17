@@ -5,7 +5,7 @@ from utils import huafeng, liandong, spea
 
 # ===========================================================================================
 
-st.title('Outlier Detection DEMO')
+st.title('离散点检测DEMO')
 
 option = st.selectbox(
     "选择测试设备",
@@ -36,3 +36,5 @@ if option:
                 st.error(err, icon="🚨")
             else:
                 st.write(df)
+                st.badge("Success", icon=":material/check:", color="green")
+                st.write(f"共找到{df.shape[0]}条离散点")
