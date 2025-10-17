@@ -8,7 +8,7 @@ def read_csv(uploaded_file):
 
     file_name = uploaded_file.name.replace("_"," ").split(" ")
 
-    circulate_no = file_name[1]
+    circulate_no = file_name[0]
 
     encoding = helper.check_encodings(uploaded_file)
 
@@ -22,7 +22,16 @@ def read_csv(uploaded_file):
         if "NTC_NTC" in names:
             index_cols.append(names)
 
+    if not index_cols:
+        return df, "未找到NTC列，请检查上传的文件！"
+    
     index_pos = df.columns.get_loc(index_cols[-1])
+
+
+    # check ntc avg
+    ntc_avg = pd.to_numeric(df.iloc[:,708], errors='coerce').mean()
+    if ntc_avg <= 4000:
+        return df, "未找到常温测试数据，请检查"
 
 
         
@@ -38,14 +47,17 @@ def read_csv(uploaded_file):
         response = requests.get(url, params=params)
         product_name = response.text.strip('"')
         if not product_name:
-            raise Exception("Product name not found")
+            raise Exception("Product ID not found")
     except Exception as e:
-        return None
+        return df, f"{circulate_no},流转单号错误，无法获取产品编码。请检查文件命名规则和流转单号！"
 
     # product_name = "EPG50PIS120E2A-01"
 
     # The criteria for identifying outliers
-    criteria = helper.criteria[product_name]
+    try:
+        criteria = helper.criteria[product_name]
+    except KeyError:
+        return df, f"{product_name} 不需要挑选离散点，请检查文件"
 
     # Identifying the exact columns with the criteria
     test_cols = []
@@ -78,4 +90,4 @@ def read_csv(uploaded_file):
 
     outlier = (basic_df.join(outlier_df, how='right')["Device_ID."])
 
-    return outlier
+    return outlier, None

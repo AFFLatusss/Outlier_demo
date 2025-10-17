@@ -24,15 +24,15 @@ if option:
         with st.spinner("处理中...", show_time=True):
             match option:
                 case "FT-001":
-                    df = spea.read_csv(uploaded_files)
+                    df, err = spea.read_csv(uploaded_files)
                 case "FT-002":
-                    df = spea.read_csv(uploaded_files)
+                    df, err = spea.read_csv(uploaded_files)
                 case "FT-003":
-                    df = liandong.read_csv(uploaded_files)
+                    df, err = liandong.read_csv(uploaded_files)
                 case "FT-006":
-                    df = huafeng.read_csv(uploaded_files)
+                    df, err = huafeng.read_csv(uploaded_files)
             
-            if df is None:
-                st.error('读取文件', icon="🚨")
+            if err:
+                st.error(err, icon="🚨")
             else:
                 st.write(df)

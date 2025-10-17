@@ -22,6 +22,9 @@ def read_csv(uploaded_file):
         if "NTC_1mA" in names:
             index_cols.append(names)
 
+    if not index_cols:
+        return df, "未找到NTC_1mA列，请检查上传的文件！"
+    
     index_pos = df.columns.get_loc(index_cols[-1])
     # print(f'the last NTC_1mA column is at position {index_pos}')
 
@@ -40,10 +43,13 @@ def read_csv(uploaded_file):
         if not product_name:
             raise Exception("Product name not found")
     except Exception as e:
-        return None
+        return df, f"{circulate_no},流转单号错误，无法获取产品编码。请检查文件命名规则和流转单号！"
 
     # The criteria for identifying outliers
-    criteria = helper.criteria[product_name]
+    try:
+        criteria = helper.criteria[product_name]
+    except KeyError:
+        return df, f"{product_name} 不需要挑选离散点，请检查文件"
 
     # Identifying the exact columns with the criteria
     test_cols = []
@@ -76,4 +82,4 @@ def read_csv(uploaded_file):
 
     outlier = (basic_df.join(outlier_df, how='right')["Device_ID."])
 
-    return outlier
+    return outlier, None
