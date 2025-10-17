@@ -19,30 +19,30 @@ def read_csv(uploaded_file):
     # positioning the index cols for splitting the DataFrame
     index_cols = []
     for names in df.columns.tolist():
-        if "NTC_1mA" in names:
+        if "NTC_NTC" in names:
             index_cols.append(names)
 
     index_pos = df.columns.get_loc(index_cols[-1])
-    # print(f'the last NTC_1mA column is at position {index_pos}')
+
 
         
     # Splitting the DataFrame
     basic_df = df.iloc[:,:7]
     detail_df = df.iloc[:,index_pos:]
 
-    # try:
+    try:
 
-    #     url = "http://10.168.4.51:8000/mssql/get_product_name"
-    #     params = {"circulate_no": circulate_no}  # Query parameters
+        url = "http://10.168.4.51:8000/mssql/get_product_name"
+        params = {"circulate_no": circulate_no}  # Query parameters
 
-    #     response = requests.get(url, params=params)
-    #     product_name = response.text.strip('"')
-    #     if not product_name:
-    #         raise Exception("Product name not found")
-    # except Exception as e:
-    #     return None
+        response = requests.get(url, params=params)
+        product_name = response.text.strip('"')
+        if not product_name:
+            raise Exception("Product name not found")
+    except Exception as e:
+        return None
 
-    product_name = "LCG15FF120E4B1-01"
+    # product_name = "EPG50PIS120E2A-01"
 
     # The criteria for identifying outliers
     criteria = helper.criteria[product_name]
