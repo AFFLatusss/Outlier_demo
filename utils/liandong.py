@@ -11,7 +11,12 @@ def read_csv(uploaded_file):
     encoding = helper.check_encodings(uploaded_file)
 
     # df = pd.read_csv(uploaded_file, encoding=encoding, header=0).rename(columns={"Device_ID.": "device_id"})
-    df = pd.read_csv(uploaded_file, encoding=encoding, header=0)
+    try:
+        df = pd.read_csv(uploaded_file, encoding=encoding, header=0)
+    except Exception as e:
+        return None, f"错误的数据格式！不符合FT-003格式标准。请检查文件"
+    
+
     df = df.iloc[3:, :]  #Remove unit and UL limit
     df = df[df["PassFail"] == "Pass"] #Remove fail rows
 

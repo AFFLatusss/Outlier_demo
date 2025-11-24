@@ -6,14 +6,25 @@ def read_csv(uploaded_file):
     
     encoding = helper.check_encodings(uploaded_file)
     skip = 0
-    with open(uploaded_file,encoding=encoding) as f:
-        lines = f.readlines()
-        for rownum, line in enumerate(lines):
-            if line.startswith("Article_Nr.,Date,Time"):
-                skip = rownum
-            elif line.startswith("SITE_NUM,PART_ID,PASSFG,SOFT_BIN"):
-                # raise Exception("Incorrect data format. Not SPEA-like. Header starts with [SITE_NUM,PART_ID,PASSFG,SOFT_BIN], should be [Article_Nr.,Date,Time]")
-                return None,  "错误的数据格式！不符合SPEA格式标准。正确表头应该是[Article_Nr.,Date,Time]....等"
+    # with open(uploaded_file,encoding=encoding) as f:
+    #     lines = f.readlines()
+    #     for rownum, line in enumerate(lines):
+    #         if line.startswith("Article_Nr.,Date,Time"):
+    #             skip = rownum
+    #         elif line.startswith("SITE_NUM,PART_ID,PASSFG,SOFT_BIN"):
+    #             # raise Exception("Incorrect data format. Not SPEA-like. Header starts with [SITE_NUM,PART_ID,PASSFG,SOFT_BIN], should be [Article_Nr.,Date,Time]")
+    #             return None,  "错误的数据格式！不符合SPEA格式标准。正确表头应该是[Article_Nr.,Date,Time]....等"
+
+        # ❗ FIX 1 — Read lines directly from UploadedFile
+    file_bytes = uploaded_file.getvalue()
+    text = file_bytes.decode(encoding)
+    lines = text.splitlines()
+
+    for rownum, line in enumerate(lines):
+        if line.startswith("Article_Nr.,Date,Time"):
+            skip = rownum
+        elif line.startswith("SITE_NUM,PART_ID,PASSFG,SOFT_BIN"):
+            return None, "错误的数据格式！不符合SPEA格式标准。正确表头应该是[Article_Nr.,Date,Time]..."
 
 
     file_name = uploaded_file.name.replace("_"," ").split(" ")
@@ -22,7 +33,7 @@ def read_csv(uploaded_file):
 
 
     # df = pd.read_csv(uploaded_file, encoding=encoding, header=0).rename(columns={"Device_ID.": "device_id"})
-    df = pd.read_csv(uploaded_file, encoding=encoding, header=0, skiprows=skip)
+    df = pd.read_csv(uploaded_file, encoding=encoding, header=0, skiprows=skip).rename(columns={"Device_ID": "Device_ID."})
     df = df.iloc[3:, :]  #Remove unit and UL limit
     df = df[df["PassFail"] == "Pass"] #Remove fail rows
 

@@ -20,7 +20,7 @@ criteria = {
             "LCG150FF120E6E2C-H":["VTH","VCESAT","ICES","IGES","VF"],
             "LCG15FF120E4B1-01":["VTH","VCESAT","ICES","IGES","VF"],
             "LCG35CI120E4B2-02":["VTH","VCESAT","ICES","IGES","VF"],
-            "LCG35CI120E4B2-02":["VTH","VCESAT","ICES","IGES","VF"],
+            "LCG25FF120E4B1-01":["VTH","VCESAT","ICES","IGES","VF"],
             "LCG400HB120E6P2-01":["VTH","VCESAT","ICES","IGES","VF"],
             "LCG450HB120E6P2-01":["VTH","VCESAT","ICES","IGES","VF"],
             "LCG820FF75E7A2-01":["VTH","VCESAT","ICES","IGES","VF"],
