@@ -19,9 +19,9 @@ option = st.selectbox(
 if not option:
     st.error("请先选择测试设备", icon="🚨")
     st.stop()
-elif option == "FT-001" or option == "FT-002":
-    st.warning("SPEA 设备暂不支持离散点检测。", icon="⚠️")
-    st.stop()
+# elif option == "FT-001" or option == "FT-002":
+#     st.warning("SPEA 设备暂不支持离散点检测。", icon="⚠️")
+#     st.stop()
 
 # -----------------------------
 # Step 2: Select mode

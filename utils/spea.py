@@ -18,7 +18,7 @@ def read_csv(uploaded_file):
     # positioning the index cols for splitting the DataFrame
     index_cols = []
     for names in df.columns.tolist():
-        if "NTC_NTC" in names:
+        if "NTC" in names:
             index_cols.append(names)
 
     if not index_cols:
