@@ -25,6 +25,7 @@ criteria = {
             "LCG450HB120E6P2-01":["VTH","VCESAT","ICES","IGES","VF"],
             "LCG820FF75E7A2-01":["VTH","VCESAT","ICES","IGES","VF"],
             "LCG600FF75E7A2-01":["VTH","VCESAT","ICES","IGES","VF"],
+            "LCG650FF75E7A3-01":["VTH","VCESAT","ICES","IGES","VF"],
             }
 
 def calc_outlier(basic_df, detail_df, circulate_no):
