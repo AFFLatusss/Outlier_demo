@@ -13,7 +13,7 @@ COMMON_CHINESE_ENCODING = 'gb18030'
 
 # --- File Uploader ---
 uploaded_files = st.file_uploader(
-    "📂 上传测试数据 (CSV 格式)", 
+    "📂 上传数据 (CSV 格式)", 
     type="csv", 
     accept_multiple_files=True
 )
