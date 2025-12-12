@@ -109,9 +109,8 @@
 # else:
 #     st.info("Enter connection details and an assignee, then click Search.")
 
-
 import streamlit as st
-import pyodbc
+import pymssql
 import xml.etree.ElementTree as ET
 
 st.title("BPM Workflow Assignee Search")
@@ -120,21 +119,21 @@ st.title("BPM Workflow Assignee Search")
 search_assignee = st.text_input("Enter assignee ID (e.g., L000102):")
 
 if search_assignee:
-    # Connect to SQL Server
-    conn = pyodbc.connect(
-        "Driver={ODBC Driver 17 for SQL Server};"
-        "Server=10.168.1.94;"
-        "Database=LinecoreBPM;"
-        "UID=baruser;"
-        "PWD=admin111.;"
+    # Connect to SQL Server using pymssql
+    conn = pymssql.connect(
+        server="10.168.1.94",
+        user="baruser",
+        password="admin111.",
+        database="LinecoreBPM",
+        port=1433  # default SQL Server port, change if needed
     )
     cursor = conn.cursor()
-    
+
     cursor.execute("""
         SELECT bpm_workflow_name, bpm_workflow_memo
         FROM bpm_workflow_det
     """)
-    
+
     final_result = []
 
     for workflow_name, memo_xml in cursor.fetchall():
@@ -149,6 +148,7 @@ if search_assignee:
         tasks = []
         ns = {'bpmn2': 'http://www.omg.org/spec/BPMN/20100524/MODEL'}
 
+        # Find <userTask> nodes with assignee attribute
         for task in root.findall(".//bpmn2:userTask[@assignee]", ns):
             assignee = task.get("assignee")
             if assignee == search_assignee:

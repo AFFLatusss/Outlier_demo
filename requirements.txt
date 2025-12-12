@@ -3,4 +3,4 @@ pandas
 numpy
 requests
 chardet
-pyodbc
+pymssql
