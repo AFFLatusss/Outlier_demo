@@ -4,8 +4,7 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Use faster mirrors (optional)
-RUN sed -i 's|http://deb.debian.org/debian|https://mirrors.tuna.tsinghua.edu.cn/debian|g' /etc/apt/sources.list
+
 
 # Install only minimal system dependencies needed for pymssql
 RUN apt-get update && apt-get install -y --no-install-recommends \
