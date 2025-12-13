@@ -113,10 +113,10 @@ import streamlit as st
 import pymssql
 import xml.etree.ElementTree as ET
 
-st.title("BPM Workflow Assignee Search")
+st.title("BPM 指定账号查询")
 
 # Input field for the assignee
-search_assignee = st.text_input("Enter assignee ID (e.g., L000102):")
+search_assignee = st.text_input("输入指定账号(e.g., L000102):")
 
 if search_assignee:
     # Connect to SQL Server using pymssql
@@ -166,8 +166,8 @@ if search_assignee:
     # Display results
     if final_result:
         for wf in final_result:
-            st.subheader(f"Workflow: {wf['workflow_name']}")
+            st.subheader(f"流程: {wf['workflow_name']}")
             for t in wf["tasks"]:
-                st.write(f"- Task: {t['name']}, Assignee: {t['assignee']}")
+                st.write(f"- 节点: {t['name']}, 指定人: {t['assignee']}")
     else:
         st.info("No matching tasks found.")
