@@ -185,18 +185,15 @@ import pandas as pd
 # -------------------------
 st.set_page_config(
     page_title="BPM 指定账号查询",
-    layout="wide"
 )
 
 st.title("🔍 BPM 流程指定人查询")
-st.caption("按指定账号查询 BPM 流程中的 UserTask 节点")
 
 # -------------------------
 # Input
 # -------------------------
 search_assignee = st.text_input(
     "输入指定账号（例如：L000102）",
-    placeholder="L000102"
 )
 
 # -------------------------
@@ -263,7 +260,7 @@ if search_assignee:
 
         # ---- Grouped display (BIG CELL effect) ----
         for workflow, g in df.groupby("流程名称"):
-            st.markdown(f"### 🧩 {workflow}")
+            st.markdown(f"### {workflow}")
 
             sub_df = g[["节点名称", "指定人"]].reset_index(drop=True)
 
