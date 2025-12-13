@@ -168,7 +168,6 @@ if search_assignee:
 
     # Display results
     if final_result:
-        st.success(f"✅ 找到 {len(df)} 个匹配节点")
         for wf in final_result:
             st.subheader(f"流程: {wf['workflow_name']}")
             for t in wf["tasks"]:
