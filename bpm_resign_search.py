@@ -183,7 +183,6 @@ import pandas as pd
 
 st.set_page_config(
     page_title="BPM 指定账号查询",
-    layout="wide"
 )
 
 st.title("🔍 BPM 指定账号查询")
@@ -192,7 +191,6 @@ st.caption("根据 BPMN XML 中的 userTask.assignee 查询流程节点")
 # Input
 search_assignee = st.text_input(
     "输入指定账号 (例如: L000102)",
-    placeholder="L000102"
 )
 
 if search_assignee:
