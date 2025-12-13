@@ -109,65 +109,154 @@
 # else:
 #     st.info("Enter connection details and an assignee, then click Search.")
 
+
+
+
+# import streamlit as st
+# import pymssql
+# import xml.etree.ElementTree as ET
+
+# st.title("BPM 指定账号查询")
+
+# # Input field for the assignee
+# search_assignee = st.text_input("输入指定账号(e.g., L000102):")
+
+# if search_assignee:
+#     # Connect to SQL Server using pymssql
+#     conn = pymssql.connect(
+#         server="10.168.1.94",
+#         user="baruser",
+#         password="admin111.",
+#         database="LinecoreBPM",
+#         port=1433  # default SQL Server port, change if needed
+#     )
+#     cursor = conn.cursor()
+
+#     cursor.execute("""
+#         SELECT bpm_workflow_name, bpm_workflow_memo
+#         FROM bpm_workflow_det
+#     """)
+
+#     final_result = []
+
+#     for workflow_name, memo_xml in cursor.fetchall():
+#         if memo_xml is None:
+#             continue
+
+#         try:
+#             root = ET.fromstring(memo_xml)
+#         except Exception:
+#             continue
+
+#         tasks = []
+#         ns = {'bpmn2': 'http://www.omg.org/spec/BPMN/20100524/MODEL'}
+
+#         # Find <userTask> nodes with assignee attribute
+#         for task in root.findall(".//bpmn2:userTask[@assignee]", ns):
+#             assignee = task.get("assignee")
+#             if assignee == search_assignee:
+#                 tasks.append({
+#                     "name": task.get("name"),
+#                     "assignee": assignee,
+#                 })
+
+#         if tasks:
+#             final_result.append({
+#                 "workflow_name": workflow_name,
+#                 "tasks": tasks
+#             })
+
+#     # Display results
+#     if final_result:
+#         for wf in final_result:
+#             st.subheader(f"流程: {wf['workflow_name']}")
+#             for t in wf["tasks"]:
+#                 st.write(f"- 节点: {t['name']}, 指定人: {t['assignee']}")
+#     else:
+#         st.info("No matching tasks found.")
+
+
 import streamlit as st
 import pymssql
 import xml.etree.ElementTree as ET
+import pandas as pd
 
-st.title("BPM 指定账号查询")
+st.set_page_config(
+    page_title="BPM 指定账号查询",
+    layout="wide"
+)
 
-# Input field for the assignee
-search_assignee = st.text_input("输入指定账号(e.g., L000102):")
+st.title("🔍 BPM 指定账号查询")
+st.caption("根据 BPMN XML 中的 userTask.assignee 查询流程节点")
+
+# Input
+search_assignee = st.text_input(
+    "输入指定账号 (例如: L000102)",
+    placeholder="L000102"
+)
 
 if search_assignee:
-    # Connect to SQL Server using pymssql
-    conn = pymssql.connect(
-        server="10.168.1.94",
-        user="baruser",
-        password="admin111.",
-        database="LinecoreBPM",
-        port=1433  # default SQL Server port, change if needed
-    )
-    cursor = conn.cursor()
+    with st.spinner("正在查询数据库..."):
+        conn = pymssql.connect(
+            server="10.168.1.94",
+            user="baruser",
+            password="admin111.",
+            database="LinecoreBPM",
+            port=1433
+        )
+        cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT bpm_workflow_name, bpm_workflow_memo
-        FROM bpm_workflow_det
-    """)
+        cursor.execute("""
+            SELECT bpm_workflow_name, bpm_workflow_memo
+            FROM bpm_workflow_det
+        """)
 
-    final_result = []
+        rows = []
+        ns = {"bpmn2": "http://www.omg.org/spec/BPMN/20100524/MODEL"}
 
-    for workflow_name, memo_xml in cursor.fetchall():
-        if memo_xml is None:
-            continue
+        for workflow_name, memo_xml in cursor.fetchall():
+            if not memo_xml:
+                continue
 
-        try:
-            root = ET.fromstring(memo_xml)
-        except Exception:
-            continue
+            try:
+                root = ET.fromstring(memo_xml)
+            except Exception:
+                continue
 
-        tasks = []
-        ns = {'bpmn2': 'http://www.omg.org/spec/BPMN/20100524/MODEL'}
+            for task in root.findall(".//bpmn2:userTask[@assignee]", ns):
+                assignee = task.get("assignee")
+                if assignee == search_assignee:
+                    rows.append({
+                        "流程名称": workflow_name,
+                        "节点名称": task.get("name"),
+                        "指定人": assignee
+                    })
 
-        # Find <userTask> nodes with assignee attribute
-        for task in root.findall(".//bpmn2:userTask[@assignee]", ns):
-            assignee = task.get("assignee")
-            if assignee == search_assignee:
-                tasks.append({
-                    "name": task.get("name"),
-                    "assignee": assignee,
-                })
+        conn.close()
 
-        if tasks:
-            final_result.append({
-                "workflow_name": workflow_name,
-                "tasks": tasks
-            })
+    # ---- Display ----
+    if rows:
+        df = pd.DataFrame(rows)
 
-    # Display results
-    if final_result:
-        for wf in final_result:
-            st.subheader(f"流程: {wf['workflow_name']}")
-            for t in wf["tasks"]:
-                st.write(f"- 节点: {t['name']}, 指定人: {t['assignee']}")
+        col1, col2 = st.columns(2)
+        col1.metric("匹配流程数", df["流程名称"].nunique())
+        col2.metric("匹配节点数", len(df))
+
+        st.divider()
+        st.dataframe(
+            df,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        # CSV download
+        st.download_button(
+            label="📥 下载 CSV",
+            data=df.to_csv(index=False, encoding="utf-8-sig"),
+            file_name=f"BPM_任务_{search_assignee}.csv",
+            mime="text/csv"
+        )
     else:
-        st.info("No matching tasks found.")
+        st.warning(f"未找到指定人 {search_assignee} 的任务节点")
+else:
+    st.info("请输入指定账号进行查询")
