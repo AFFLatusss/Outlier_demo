@@ -175,86 +175,113 @@
 #     else:
 #         st.info("No matching tasks found.")
 
-
 import streamlit as st
 import pymssql
 import xml.etree.ElementTree as ET
 import pandas as pd
 
+# -------------------------
+# Page setup
+# -------------------------
 st.set_page_config(
     page_title="BPM 指定账号查询",
+    layout="wide"
 )
 
-st.title("🔍 BPM 指定账号查询")
-st.caption("根据 BPMN XML 中的 userTask.assignee 查询流程节点")
+st.title("🔍 BPM 流程指定人查询")
+st.caption("按指定账号查询 BPM 流程中的 UserTask 节点")
 
+# -------------------------
 # Input
+# -------------------------
 search_assignee = st.text_input(
-    "输入指定账号 (例如: L000102)",
+    "输入指定账号（例如：L000102）",
+    placeholder="L000102"
 )
 
+# -------------------------
+# Search
+# -------------------------
 if search_assignee:
-    with st.spinner("正在查询数据库..."):
-        conn = pymssql.connect(
-            server="10.168.1.94",
-            user="baruser",
-            password="admin111.",
-            database="LinecoreBPM",
-            port=1433
-        )
-        cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT bpm_workflow_name, bpm_workflow_memo
-            FROM bpm_workflow_det
-        """)
+    with st.spinner("正在查询数据库，请稍候..."):
+        try:
+            # ---- DB connection (pymssql) ----
+            conn = pymssql.connect(
+                server="10.168.1.94",
+                user="baruser",
+                password="admin111.",
+                database="LinecoreBPM",
+                port=1433
+            )
+            cursor = conn.cursor()
 
-        rows = []
-        ns = {"bpmn2": "http://www.omg.org/spec/BPMN/20100524/MODEL"}
+            cursor.execute("""
+                SELECT bpm_workflow_name, bpm_workflow_memo
+                FROM bpm_workflow_det
+            """)
 
-        for workflow_name, memo_xml in cursor.fetchall():
-            if not memo_xml:
-                continue
+            rows = cursor.fetchall()
+            conn.close()
 
-            try:
-                root = ET.fromstring(memo_xml)
-            except Exception:
-                continue
+        except Exception as e:
+            st.error(f"数据库连接失败: {e}")
+            st.stop()
 
-            for task in root.findall(".//bpmn2:userTask[@assignee]", ns):
-                assignee = task.get("assignee")
-                if assignee == search_assignee:
-                    rows.append({
-                        "流程名称": workflow_name,
-                        "节点名称": task.get("name"),
-                        "指定人": assignee
-                    })
+    results = []
 
-        conn.close()
+    # BPMN namespace
+    ns = {"bpmn2": "http://www.omg.org/spec/BPMN/20100524/MODEL"}
 
-    # ---- Display ----
-    if rows:
-        df = pd.DataFrame(rows)
+    for workflow_name, memo_xml in rows:
+        if not memo_xml:
+            continue
 
-        col1, col2 = st.columns(2)
-        col1.metric("匹配流程数", df["流程名称"].nunique())
-        col2.metric("匹配节点数", len(df))
+        try:
+            root = ET.fromstring(memo_xml)
+        except Exception:
+            continue
+
+        for task in root.findall(".//bpmn2:userTask[@assignee]", ns):
+            assignee = task.get("assignee")
+            if assignee == search_assignee:
+                results.append({
+                    "流程名称": workflow_name,
+                    "节点名称": task.get("name"),
+                    "指定人": assignee
+                })
+
+    # -------------------------
+    # Display
+    # -------------------------
+    if results:
+        df = pd.DataFrame(results)
+
+        st.success(f"✅ 找到 {len(df)} 个匹配节点")
 
         st.divider()
-        st.dataframe(
-            df,
-            use_container_width=True,
-            hide_index=True
-        )
 
-        # CSV download
+        # ---- Grouped display (BIG CELL effect) ----
+        for workflow, g in df.groupby("流程名称"):
+            st.markdown(f"### 🧩 {workflow}")
+
+            sub_df = g[["节点名称", "指定人"]].reset_index(drop=True)
+
+            st.table(sub_df)
+
+            st.divider()
+
+        # ---- CSV Download ----
+        csv = df.to_csv(index=False, encoding="utf-8-sig")
         st.download_button(
-            label="📥 下载 CSV",
-            data=df.to_csv(index=False, encoding="utf-8-sig"),
-            file_name=f"BPM_任务_{search_assignee}.csv",
+            "⬇️ 下载 CSV",
+            data=csv,
+            file_name=f"BPM_Assignee_{search_assignee}.csv",
             mime="text/csv"
         )
+
     else:
-        st.warning(f"未找到指定人 {search_assignee} 的任务节点")
+        st.info("未找到匹配的流程节点")
+
 else:
-    st.info("请输入指定账号进行查询")
+    st.info("👆 请输入指定账号后开始查询")
