@@ -2,7 +2,7 @@ import pandas as pd
 from utils import helper
 
 
-def read_csv(uploaded_file):
+def read_csv(uploaded_file, type="modules"):
 
     file_name = uploaded_file.name.replace("_"," ").split(" ")
 
@@ -12,6 +12,7 @@ def read_csv(uploaded_file):
 
     # df = pd.read_csv(uploaded_file, encoding=encoding, header=0).rename(columns={"Device_ID.": "device_id"})
     df = pd.read_csv(uploaded_file, encoding=encoding, header=0)
+    units_df = df.iloc[:3, :]
     df = df.iloc[3:, :]  #Remove unit and UL limit
     df = df[df["PassFail"] == "Pass"] #Remove fail rows
 
@@ -38,4 +39,7 @@ def read_csv(uploaded_file):
     basic_df = df.iloc[:,:7]
     detail_df = df.iloc[:,index_pos:]
 
-    return helper.calc_outlier(basic_df, detail_df, circulate_no)
+    if type == "modules":
+        return helper.calc_outlier(basic_df, detail_df, circulate_no)
+    elif type == "graphs":
+        return detail_df, units_df.iloc[:, index_pos:]

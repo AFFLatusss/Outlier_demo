@@ -2,7 +2,7 @@ import pandas as pd
 from utils import helper
 
 
-def read_csv(uploaded_file):
+def read_csv(uploaded_file, type="modules"):
 
     file_name = uploaded_file.name.replace("_"," ").split(" ")
 
@@ -16,7 +16,7 @@ def read_csv(uploaded_file):
     except Exception as e:
         return None, f"错误的数据格式！不符合FT-003格式标准。请检查文件"
     
-
+    units_df = df.iloc[:3, :]
     df = df.iloc[3:, :]  #Remove unit and UL limit
     df = df[df["PassFail"] == "Pass"] #Remove fail rows
 
@@ -37,5 +37,8 @@ def read_csv(uploaded_file):
     basic_df = df.iloc[:,:7]
     detail_df = df.iloc[:,index_pos:]
 
-    return helper.calc_outlier(basic_df, detail_df, circulate_no)
+    if type == "modules":
+        return helper.calc_outlier(basic_df, detail_df, circulate_no)
+    elif type == "graphs":
+        return detail_df, units_df.iloc[:, index_pos:]
 

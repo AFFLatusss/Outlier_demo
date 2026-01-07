@@ -34,6 +34,7 @@ def read_csv(uploaded_file, type="modules"):
 
     # df = pd.read_csv(uploaded_file, encoding=encoding, header=0).rename(columns={"Device_ID.": "device_id"})
     df = pd.read_csv(uploaded_file, encoding=encoding, header=0, skiprows=skip).rename(columns={"Device_ID": "Device_ID."})
+    units_df = df.iloc[:3, :]
     df = df.iloc[3:, :]  #Remove unit and UL limit
     df = df[df["PassFail"] == "Pass"] #Remove fail rows
 
@@ -57,5 +58,5 @@ def read_csv(uploaded_file, type="modules"):
     if type == "modules":
         return helper.calc_outlier(basic_df, detail_df, circulate_no)
     elif type == "graphs":
-        return 
+        return detail_df, units_df.iloc[:, index_pos:]
     
