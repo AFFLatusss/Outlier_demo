@@ -1,6 +1,4 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
 from utils import huafeng, liandong, spea
 
 # st.set_page_config(page_title="离散点检测 DEMO")

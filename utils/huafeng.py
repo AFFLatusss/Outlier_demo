@@ -2,7 +2,7 @@ import pandas as pd
 from utils import helper
 
 
-def read_csv(uploaded_file):
+def read_csv(uploaded_file, type="modules"):
     
     encoding = helper.check_encodings(uploaded_file)
     skip = 0
@@ -53,5 +53,9 @@ def read_csv(uploaded_file):
     basic_df = df.iloc[:,:7]
     detail_df = df.iloc[:,index_pos:]
 
-    return helper.calc_outlier(basic_df, detail_df, circulate_no)
+
+    if type == "modules":
+        return helper.calc_outlier(basic_df, detail_df, circulate_no)
+    elif type == "graphs":
+        return 
     
