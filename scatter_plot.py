@@ -54,6 +54,7 @@ if not parameter_columns:
 selected_columns = st.multiselect(
     "🔍 选择要分析的参数列（列名）：",
     options=parameter_columns,
+    placeholder="选择要分析的参数列",
     # default=parameter_columns[:5] if len(parameter_columns) >= 5 else parameter_columns,  # Pre-select first few
     help="多选列名，将为每个选中的参数生成散点图"
 )
@@ -73,6 +74,13 @@ def validate_series(s):
     except:
         return False, "数据格式异常：前3行应为 单位 / 下限 / 上限"
 
+plot_options_map = {
+    "点": "scatter",
+    "线": "line"
+}
+selection = st.segmented_control(
+    "Plot Type", plot_options_map.keys(), selection_mode="single"
+)
 if st.button("🚀 生成", type="primary"):
 
     # --- Plotting Section ---
@@ -89,7 +97,7 @@ if st.button("🚀 生成", type="primary"):
                     st.warning(f"列 '{col_name}' 数据格式异常: {msg}")
                     continue
                 try:
-                    fig = plot_scatter(s)
+                    fig = plot_scatter(s, test_name=col_name, type=plot_options_map[selection])
                     st.pyplot(fig)
                     plt.close(fig)
                 except Exception as e:
@@ -103,7 +111,7 @@ if st.button("🚀 生成", type="primary"):
             st.warning(f"列 '{col_name}' 数据格式异常: {msg}")
         else:
             try:
-                fig = plot_scatter(s)
+                fig = plot_scatter(s,test_name=col_name, type=selection)
                 st.pyplot(fig)
                 plt.close(fig)
             except Exception as e:
