@@ -32,9 +32,26 @@ if not option:
 # -----------------------------
 # Step 3: Upload file
 # -----------------------------
-uploaded_files = st.file_uploader("📂 上传测试数据 (CSV 格式)", type="csv")
+uploader_key = f"uploader_{option}"
+
+if option == "FT-006":
+    uploaded_files = st.file_uploader(
+        "📂 上传测试数据 (CSV 格式)",
+        type=["csv"],
+        key=uploader_key,
+    )
+else:
+    uploaded_files = st.file_uploader(
+        "📂 上传测试数据 (CSV/XLSX格式)",
+        type=["csv", "xlsx"],
+        key=uploader_key,
+    )
+
+
+
+
 if not uploaded_files:
-    st.info("等待上传 CSV 测试数据。")
+    st.info("等待上传 CSV/XLSX 测试数据。")
     st.stop()
 
 # -----------------------------

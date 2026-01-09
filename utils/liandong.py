@@ -1,5 +1,6 @@
 import pandas as pd
 from utils import helper
+import os
 
 
 def read_csv(uploaded_file, type="modules"):
@@ -12,7 +13,13 @@ def read_csv(uploaded_file, type="modules"):
 
     # df = pd.read_csv(uploaded_file, encoding=encoding, header=0).rename(columns={"Device_ID.": "device_id"})
     try:
-        df = pd.read_csv(uploaded_file, encoding=encoding, header=0)
+        ext  = os.path.splitext(uploaded_file.name)[1].lower()
+
+        if ext == '.csv':
+            df = pd.read_csv(uploaded_file, encoding=encoding, header=0)
+        elif ext == '.xlsx':
+            df = pd.read_excel(uploaded_file,  header=0)
+
     except Exception as e:
         return None, f"错误的数据格式！不符合FT-003格式标准。请检查文件"
     
