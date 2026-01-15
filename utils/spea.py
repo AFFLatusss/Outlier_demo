@@ -1,7 +1,6 @@
 import pandas as pd
 from utils import helper
-
-
+import os
 def read_csv(uploaded_file, type="modules"):
 
     file_name = uploaded_file.name.replace("_"," ").split(" ")
@@ -9,9 +8,16 @@ def read_csv(uploaded_file, type="modules"):
     circulate_no = file_name[0]
 
     encoding = helper.check_encodings(uploaded_file)
+    
+    ext  = os.path.splitext(uploaded_file.name)[1].lower()
 
+    if ext == '.csv':
+        df = pd.read_csv(uploaded_file, encoding=encoding, header=0)
+    elif ext == '.xlsx':
+        df = pd.read_excel(uploaded_file,  header=0)
+
+        
     # df = pd.read_csv(uploaded_file, encoding=encoding, header=0).rename(columns={"Device_ID.": "device_id"})
-    df = pd.read_csv(uploaded_file, encoding=encoding, header=0)
     units_df = df.iloc[:3, :]
     df = df.iloc[3:, :]  #Remove unit and UL limit
     df = df[df["PassFail"] == "Pass"] #Remove fail rows
