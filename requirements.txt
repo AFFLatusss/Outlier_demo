@@ -4,3 +4,4 @@ numpy
 requests
 chardet
 pymssql
+matplotlib
