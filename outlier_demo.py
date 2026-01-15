@@ -2,7 +2,7 @@ import streamlit as st
 from utils import huafeng, liandong, spea
 
 # st.set_page_config(page_title="离散点检测 DEMO")
-st.title("📊 离散点检测 DEMO")
+st.title("📊 离散点筛选")
 
 # -----------------------------
 # Step 1: Select device
