@@ -266,7 +266,7 @@ if outlier_mode:
 
 else:
     uploaded_file = st.file_uploader(
-        "📂 上传测试数据 (xlsx 格式，请勿加密)",
+        "1) 上传测试数据 (xlsx 格式，请勿加密)",
         type="xlsx",
         help="仅支持单个未加密的 .xlsx 文件",
     )
@@ -302,7 +302,7 @@ if not parameter_columns:
     st.stop()
 
 selected_columns = st.multiselect(
-    "🔍 选择要分析的参数列（列名）：",
+    "2) 选择要分析的参数列（列名）：",
     options=parameter_columns,
     placeholder="选择要分析的参数列",
 )
@@ -329,7 +329,7 @@ def validate_series(series: pd.Series):
 # =============================
 PLOT_STYLE_MAP = {"点": "scatter", "线": "line"}
 plot_style = st.segmented_control(
-    "制图样式",
+    "3)制图样式",
     PLOT_STYLE_MAP.keys(),
     default="线",
 )
@@ -347,7 +347,7 @@ if outlier_mode:
 # =============================
 # Plotting
 # =============================
-if st.button("🚀 生成", type="primary"):
+if st.button("4) 生成", type="primary"):
     st.subheader("📊 散点图分析结果")
 
     # -------- Merged Plot (Outlier mode only) --------
