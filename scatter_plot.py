@@ -266,7 +266,7 @@ if outlier_mode:
 
 else:
     uploaded_file = st.file_uploader(
-        "1) 上传测试数据 (xlsx 格式，请勿加密)",
+        "📂 上传测试数据 (xlsx 格式，请勿加密)",
         type="xlsx",
         help="仅支持单个未加密的 .xlsx 文件",
     )
@@ -302,7 +302,7 @@ if not parameter_columns:
     st.stop()
 
 selected_columns = st.multiselect(
-    "2) 选择要分析的参数列（列名）：",
+    "🔍 选择要分析的参数列（列名）：",
     options=parameter_columns,
     placeholder="选择要分析的参数列",
 )
@@ -329,7 +329,7 @@ def validate_series(series: pd.Series):
 # =============================
 PLOT_STYLE_MAP = {"点": "scatter", "线": "line"}
 plot_style = st.segmented_control(
-    "3)制图样式",
+    "制图样式",
     PLOT_STYLE_MAP.keys(),
     default="线",
 )
