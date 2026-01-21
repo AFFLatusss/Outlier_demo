@@ -70,11 +70,16 @@ if not reader_func:
     st.stop()
 
 with st.spinner("处理中，请稍候..."):
-    df, err = reader_func(uploaded_files)
-
-if err:
-    st.error(err, icon="🚨")
-    st.stop()
+    # df, err = reader_func(uploaded_files)
+    try:
+        details_df, units_df = reader_func(uploaded_files, type="modules")
+        df = pd.concat([units_df, details_df], ignore_index=True)
+    except ValueError as e:
+        st.error(str(e), icon="🚨")
+        st.stop()
+# if err:
+#     st.error(err, icon="🚨")
+#     st.stop()
 
 # -----------------------------
 # Step 5: Show results

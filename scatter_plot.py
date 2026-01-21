@@ -235,7 +235,7 @@ def fig_to_png_bytes(fig):
 # =============================
 # Page Config
 # =============================
-st.set_page_config(page_title="散点图分析工具", layout="wide")
+st.set_page_config(page_title="散点图分析工具")
 st.title("📄 测试数据散点图分析")
 
 
