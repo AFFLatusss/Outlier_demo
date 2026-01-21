@@ -205,6 +205,11 @@
 #             except Exception as e:
 #                 st.error(f"绘制失败: {str(e)}")
         
+import io
+import base64
+import zipfile
+from datetime import datetime
+
         
 import streamlit as st
 import pandas as pd
@@ -212,6 +217,19 @@ import matplotlib.pyplot as plt
 
 from utils import huafeng, liandong, spea
 from utils.plot import plot_scatter
+
+def fig_to_base64(fig):
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode("utf-8")
+
+
+def fig_to_png_bytes(fig):
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+    buf.seek(0)
+    return buf
 
 
 # =============================
@@ -261,8 +279,12 @@ if outlier_mode:
     reader_func = CSV_READERS[equipment]
 
     with st.spinner("处理中，请稍候..."):
-        details_df, units_df = reader_func(uploaded_file, type="graphs")
-        df = pd.concat([units_df, details_df], ignore_index=True)
+        try:
+            details_df, units_df = reader_func(uploaded_file, type="graphs")
+            df = pd.concat([units_df, details_df], ignore_index=True)
+        except ValueError as e:
+            st.error(str(e), icon="🚨")
+            st.stop()
 
 else:
     uploaded_file = st.file_uploader(
@@ -343,12 +365,14 @@ if outlier_mode:
         default="分别制图",
     )
 
-
-# =============================
+## =============================
 # Plotting
 # =============================
 if st.button("4) 生成", type="primary"):
     st.subheader("📊 散点图分析结果")
+
+    # html_sections = []
+    # png_files = {}  # filename -> BytesIO
 
     # -------- Merged Plot (Outlier mode only) --------
     if outlier_mode and plot_mode == "合并制图":
@@ -367,12 +391,27 @@ if st.button("4) 生成", type="primary"):
                 outlier_mode=True,
                 merge=True,
             )
+
             st.pyplot(fig)
-            plt.close(fig)
+
+            # # HTML
+            # img64 = fig_to_base64(fig)
+            # html_sections.append(f"""
+            # <section class="plot">
+            #   <h2>合并散点图</h2>
+            #   <img src="data:image/png;base64,{img64}">
+            # </section>
+            # """)
+
+            # # ZIP
+            # png_files["merged_plot.png"] = fig_to_png_bytes(fig)
+
+            # plt.close(fig)
+
         except Exception as e:
             st.error(f"绘制失败: {e}")
 
-    # -------- Separate Plots (default path) --------
+    # -------- Separate Plots --------
     else:
         containers = (
             st.tabs(selected_columns)
@@ -395,7 +434,94 @@ if st.button("4) 生成", type="primary"):
                         type=PLOT_STYLE_MAP[plot_style],
                         outlier_mode=outlier_mode,
                     )
+
                     st.pyplot(fig)
+
+                    # # HTML
+                    # img64 = fig_to_base64(fig)
+                    # html_sections.append(f"""
+                    # <section class="plot">
+                    #   <h2>{col}</h2>
+                    #   <img src="data:image/png;base64,{img64}">
+                    # </section>
+                    # """)
+
+                    # # ZIP
+                    # safe_name = col.replace("/", "_").replace(" ", "_")
+                    # png_files[f"{safe_name}.png"] = fig_to_png_bytes(fig)
+
                     plt.close(fig)
+
                 except Exception as e:
                     st.error(f"绘制 '{col}' 失败: {e}")
+
+    # # -------- Export Section --------
+    # if html_sections:
+    #     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    #     # ---- HTML ----
+    #     html_content = f"""
+    #     <!DOCTYPE html>
+    #     <html lang="zh">
+    #     <head>
+    #       <meta charset="utf-8">
+    #       <title>散点图分析报告</title>
+    #       <style>
+    #         body {{
+    #           font-family: Arial, sans-serif;
+    #           padding: 24px;
+    #         }}
+    #         h1 {{
+    #           text-align: center;
+    #           margin-bottom: 32px;
+    #         }}
+    #         .plot {{
+    #           margin-bottom: 32px;
+    #           break-inside: avoid;
+    #           page-break-inside: avoid;
+    #         }}
+    #         img {{
+    #           width: 100%;
+    #           max-width: 1000px;
+    #           display: block;
+    #           margin: 0 auto;
+    #         }}
+    #         @page {{
+    #           size: A4;
+    #           margin: 15mm;
+    #         }}
+    #       </style>
+    #     </head>
+    #     <body>
+    #       <h1>散点图分析报告</h1>
+    #       <p style="text-align:center;">生成时间：{timestamp}</p>
+    #       {''.join(html_sections)}
+    #     </body>
+    #     </html>
+    #     """
+
+    #     col1, col2 = st.columns(2)
+
+    #     with col1:
+    #         st.download_button(
+    #             "🌐 下载 HTML 报告（浏览器转 PDF）",
+    #             data=html_content,
+    #             file_name="scatter_report.html",
+    #             mime="text/html",
+    #         )
+
+    #     # ---- ZIP ----
+    #     with col2:
+    #         zip_buffer = io.BytesIO()
+    #         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+    #             for name, buf in png_files.items():
+    #                 zf.writestr(name, buf.getvalue())
+
+    #         zip_buffer.seek(0)
+
+    #         st.download_button(
+    #             "📦 下载所有图像 (ZIP)",
+    #             data=zip_buffer,
+    #             file_name="scatter_plots.zip",
+    #             mime="application/zip",
+    #         )

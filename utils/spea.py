@@ -2,48 +2,35 @@ import pandas as pd
 from utils import helper
 import os
 def read_csv(uploaded_file, type="modules"):
-
     file_name = uploaded_file.name.replace("_"," ").split(" ")
-
     circulate_no = file_name[0]
 
     encoding = helper.check_encodings(uploaded_file)
-    
-    ext  = os.path.splitext(uploaded_file.name)[1].lower()
+    ext = os.path.splitext(uploaded_file.name)[1].lower()
 
     if ext == '.csv':
         df = pd.read_csv(uploaded_file, encoding=encoding, header=0)
     elif ext == '.xlsx':
-        df = pd.read_excel(uploaded_file,  header=0)
+        df = pd.read_excel(uploaded_file, header=0)
+    else:
+        raise ValueError("不支持的文件格式")
 
-        
-    # df = pd.read_csv(uploaded_file, encoding=encoding, header=0).rename(columns={"Device_ID.": "device_id"})
     units_df = df.iloc[:3, :]
-    df = df.iloc[3:, :]  #Remove unit and UL limit
-    df = df[df["PassFail"] == "Pass"] #Remove fail rows
+    df = df.iloc[3:, :]
+    df = df[df["PassFail"] == "Pass"]
 
-    # positioning the index cols for splitting the DataFrame
-    index_cols = []
-    for names in df.columns.tolist():
-        if "NTC" in names:
-            index_cols.append(names)
-
+    index_cols = [c for c in df.columns if "NTC" in c]
     if not index_cols:
-        return df, "未找到NTC列，请检查上传的文件！"
-    
+        raise ValueError("未找到NTC列，请检查上传的文件！")
+
     index_pos = df.columns.get_loc(index_cols[-1])
 
-
-    # check ntc avg
-    ntc_avg = pd.to_numeric(df.iloc[:,index_pos], errors='coerce').mean()
+    ntc_avg = pd.to_numeric(df.iloc[:, index_pos], errors='coerce').mean()
     if ntc_avg <= 4000:
-        return df, "未找到常温测试数据，请检查"
+        raise ValueError("未找到常温测试数据，请检查")
 
-
-        
-    # Splitting the DataFrame
-    basic_df = df.iloc[:,:7]
-    detail_df = df.iloc[:,index_pos:]
+    basic_df = df.iloc[:, :7]
+    detail_df = df.iloc[:, index_pos:]
 
     if type == "modules":
         return helper.calc_outlier(basic_df, detail_df, circulate_no)

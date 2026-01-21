@@ -45,7 +45,7 @@ def read_csv(uploaded_file, type="modules"):
             index_cols.append(names)
 
     if not index_cols:
-        return df, "未找到DC_NTC_TEST列，请检查上传的文件！"
+       raise ValueError("未找到DC_NTC_TEST列，请检查上传的文件！")
     
     index_pos = df.columns.get_loc(index_cols[-1])
 

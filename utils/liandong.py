@@ -21,7 +21,7 @@ def read_csv(uploaded_file, type="modules"):
             df = pd.read_excel(uploaded_file,  header=0)
 
     except Exception as e:
-        return None, f"错误的数据格式！不符合FT-003格式标准。请检查文件"
+        raise ValueError("错误的数据格式！不符合FT-003格式标准。请检查文件")
     
     units_df = df.iloc[:3, :]
     df = df.iloc[3:, :]  #Remove unit and UL limit
@@ -34,7 +34,7 @@ def read_csv(uploaded_file, type="modules"):
             index_cols.append(names)
 
     if not index_cols:
-        return df, "未找到NTC_1mA列，请检查上传的文件！"
+        raise ValueError("未找到NTC_1mA列，请检查上传的文件！")
     
     index_pos = df.columns.get_loc(index_cols[-1])
     # print(f'the last NTC_1mA column is at position {index_pos}')
