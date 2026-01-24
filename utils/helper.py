@@ -32,7 +32,7 @@ def calc_outlier(basic_df, detail_df, circulate_no):
 
     
 
-    url = "http://10.168.4.51:8000/mssql/get_product_name"
+    url = "http://10.168.0.51:8848/mssql/get_product_name"
     params = {"circulate_no": circulate_no}  # Query parameters
 
 
