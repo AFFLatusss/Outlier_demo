@@ -41,9 +41,11 @@ def calc_outlier(basic_df, detail_df, circulate_no):
         response.raise_for_status()
         product_name = response.text.strip().strip('"')
         if not product_name:
-            return None, f"无法找到流转单{circulate_no}对应的产品编码，请检查流转单号和文件命名！"
+            # return None, f"无法找到流转单{circulate_no}对应的产品编码，请检查流转单号和文件命名！"
+            raise Exception(f"无法找到流转单{circulate_no}对应的产品编码，请检查流转单号和文件命名！")
     except requests.RequestException:
-        return None, "无法连接数据库接口，请检查网络或服务器状态！"
+        # return None, "无法连接数据库接口，请检查网络或服务器状态！"
+        raise Exception("无法连接数据库接口，请检查网络或服务器状态！")
 
 
 
@@ -51,7 +53,8 @@ def calc_outlier(basic_df, detail_df, circulate_no):
     # The criteria for identifying outliers
     test_criteria = criteria.get(product_name)
     if not test_criteria:
-        return None, f"{product_name} 不需要挑选离散点，请检查文件！"
+        # return None, f"{product_name} 不需要挑选离散点，请检查文件！"
+        raise Exception(f"{product_name} 不需要挑选离散点，请检查文件！")
     
 
     # Identifying the exact columns with the criteria
@@ -85,4 +88,10 @@ def calc_outlier(basic_df, detail_df, circulate_no):
 
     outlier = basic_df.loc[outlier_df.index, "Device_ID."]
 
-    return outlier, None
+    result = {
+        "outlier": outlier,
+        "error": None,
+        "circulate_no": circulate_no,
+        "product_name": product_name,
+    }
+    return result

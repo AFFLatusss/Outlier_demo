@@ -24,7 +24,8 @@ def read_csv(uploaded_file, type="modules"):
         if line.startswith("Article_Nr.,Date,Time"):
             skip = rownum
         elif line.startswith("SITE_NUM,PART_ID,PASSFG,SOFT_BIN"):
-            return None, "错误的数据格式！不符合SPEA格式标准。正确表头应该是[Article_Nr.,Date,Time]..."
+            # return None, "错误的数据格式！不符合SPEA格式标准。正确表头应该是[Article_Nr.,Date,Time]..."
+            raise Exception("错误的数据格式！不符合SPEA格式标准。正确表头应该是[Article_Nr.,Date,Time]...等")
 
 
     file_name = uploaded_file.name.replace("_"," ").split(" ")
