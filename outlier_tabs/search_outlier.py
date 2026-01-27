@@ -3,7 +3,6 @@ import streamlit as st
 import pandas as pd
 
 def search_render():
-    st.subheader("🔍 离散点历史数据查询")
 
     # 1. 初始化 Session State 存储查询结果
     if "search_results" not in st.session_state:
