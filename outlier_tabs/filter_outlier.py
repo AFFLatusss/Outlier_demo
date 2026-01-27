@@ -19,10 +19,10 @@ def filter_outlier():
     if not option:
         st.error("请先选择测试设备", icon="🚨")
         return
-    elif option == "FT-001" or option == "FT-002":
-        st.warning("SPEA 设备暂不支持离散点检测。", icon="⚠️")
-        # st.stop()
-        return
+    # elif option == "FT-001" or option == "FT-002":
+    #     st.warning("SPEA 设备暂不支持离散点检测。", icon="⚠️")
+    #     # st.stop()
+    #     return
     # -----------------------------
     # Step 2: Select mode
     # -----------------------------
@@ -185,7 +185,7 @@ def filter_outlier():
                         else:
                             error_msg = response.json()["detail"]
                             st.error(
-                                f"用户认证失败\n"
+                                f"上传失败\n"
                                 f":{error_msg}"
                             )
                             return
