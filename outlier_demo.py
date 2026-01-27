@@ -1,10 +1,9 @@
 # outlier_page.py
 import streamlit as st
-from outlier_tabs.filter_outlier import filter_outlier
-from outlier_tabs.search_outlier import search_outlier
+from outlier_tabs import filter_outlier, search_outlier
 
 st.title("📊 离散点筛选")
-
+# st.set_page_config(page_title="离散点筛选", layout="wide")
 st.markdown("""
     <style>
     /* Target the individual tab buttons */
@@ -26,10 +25,12 @@ st.markdown("""
 
 
 
-filter_outlier, search_outlier = st.tabs(["filter_outlier", "search_outlier"])
+filter_tab, search_tab = st.tabs(["离散点筛选/上传", "离散点查询"])
 
-with filter_outlier:
-    filter_outlier()
+with filter_tab:
+    filter_outlier.filter_outlier() 
 
-with search_outlier:
-    search_outlier()
+
+with search_tab:
+    search_outlier.search_render()
+

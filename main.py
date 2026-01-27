@@ -9,5 +9,5 @@ scatter_plot_page = st.Page("scatter_plot.py", title="散点图")
 
 
 pg = st.navigation([outlier_page, merge_csv_page,scatter_plot_page, bpm_resign_search])
-st.set_page_config(page_title="Data manager")
+# st.set_page_config(page_title="Data manager")
 pg.run()

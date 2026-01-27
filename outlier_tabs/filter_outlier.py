@@ -18,11 +18,11 @@ def filter_outlier():
 
     if not option:
         st.error("请先选择测试设备", icon="🚨")
-        st.stop()
-    # elif option == "FT-001" or option == "FT-002":
-    #     st.warning("SPEA 设备暂不支持离散点检测。", icon="⚠️")
-    #     st.stop()
-
+        return
+    elif option == "FT-001" or option == "FT-002":
+        st.warning("SPEA 设备暂不支持离散点检测。", icon="⚠️")
+        # st.stop()
+        return
     # -----------------------------
     # Step 2: Select mode
     # -----------------------------
@@ -51,8 +51,44 @@ def filter_outlier():
 
     if not uploaded_files:
         st.info("等待上传 CSV / XLSX 测试数据。")
-        st.stop()
+        # st.stop()
+        return
 
+    # # --------------------------
+    # # Step 1 & 2: Setup Columns (1/4 and 3/4 width)
+    # # -------------------------------------------------
+    # col1, col2 = st.columns([0.5, 3.5])
+
+    # with col1:
+    #     option = st.selectbox(
+    #         "选择测试设备",
+    #         ("FT-001", "FT-002", "FT-003", "FT-006"),
+    #         index=None,
+    #         placeholder="请选择设备...",
+    #     )
+
+    # # Guard Clause: If no machine is selected, stop the function here
+    # if not option:
+    #     st.error("请先选择测试设备", icon="🚨")
+    #     return
+
+
+    # with col2:
+    #     # Determine file types based on the machine selected in col1
+    #     file_types = ["csv"] if option == "FT-006" else ["csv", "xlsx"]
+    #     label = f"📂 上传测试数据 ({' / '.join(file_types).upper()} 格式)"
+        
+    #     uploaded_files = st.file_uploader(
+    #         label,
+    #         type=file_types,
+    #         key=f"uploader_{option}",
+    #     )
+
+    # # Guard Clause: If no file is uploaded, stop the function here
+    # if not uploaded_files:
+    #     st.info("等待上传测试数据。")
+    #     return
+    
     # -------------------------------------------------
     # Step 3: Process file
     # -------------------------------------------------
@@ -66,7 +102,8 @@ def filter_outlier():
     reader_func = readers.get(option)
     if not reader_func:
         st.error("未知设备类型，请检查配置。", icon="🚨")
-        st.stop()
+        # st.stop()
+        return
 
     try:
         with st.spinner("处理中，请稍候..."):
@@ -77,7 +114,7 @@ def filter_outlier():
             #     raise Exception(result["error"])
     except Exception as e:
         st.error(str(e), icon="🚨")
-        st.stop()
+        return
 
     # -------------------------------------------------
     # Step 4: Show results
