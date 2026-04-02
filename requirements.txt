@@ -6,3 +6,5 @@ chardet
 pymssql
 matplotlib
 openpyxl
+influxdb-client
+plotly
