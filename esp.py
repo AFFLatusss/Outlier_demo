@@ -24,14 +24,14 @@ COLOR_MAP = {
 
 # Machine ID to MAC Mapping
 MACHINE_MAP = {
-    "DA-06": "AC:A7:04:13:1D:DC",
-    "DA-08": "AC:A7:04:13:6B:60",
+    "DA-08": "AC:A7:04:13:1D:DC",
+    "DA-06": "AC:A7:04:13:6B:60",
     "AGT-001": "AC:A7:04:29:82:94",
 
 }
 
 st.set_page_config(layout="wide")
-st.title("三色灯数据监控看板")
+st.title("三色灯数据监控样例")
 
 db = InfluxManager(**INFLUX_CONFIG)
 
@@ -68,13 +68,17 @@ if fetch_clicked:
         st.session_state['df'] = df
         st.session_state['current_display_name'] = selected_machine_id
         st.session_state['last_range'] = selected_label
-
 # --- Visualization ---
 if 'df' in st.session_state and not st.session_state['df'].empty:
-    df = st.session_state['df']
+    # 1. Sort by time to prevent the "back-and-forth" diagonal lines
+    plot_df = st.session_state['df'].copy().sort_values('_time')
     
+    # 2. Add -1 to your color map so it has a distinct look (e.g., Grey)
+    COLOR_MAP["-1"] = "#808080" # Grey for disconnected
+
+    status_cols = ["red", "green", "yellow"]
     target_cols = ["red", "green", "yellow", "count"]
-    available_cols = [c for c in df.columns if c in target_cols]
+    available_cols = [c for c in plot_df.columns if c in target_cols]
 
     selected_metrics = st.multiselect(
         "选择要显示的数据", 
@@ -83,26 +87,34 @@ if 'df' in st.session_state and not st.session_state['df'].empty:
     )
 
     if selected_metrics:
+        # 3. Use 'hv' (Horizontal-Vertical) line shape
+        # This is CRITICAL for status data. It makes the jump to -1 look like a "Step"
         fig = px.line(
-            df, 
+            plot_df, 
             x='_time', 
             y=selected_metrics, 
-            # Use the Display Name in the title
-            title=f"设备: {st.session_state.get('current_display_name')} - 历史趋势 ({st.session_state.get('last_range')})",
+            title=f"设备: {st.session_state.get('current_display_name')} - 历史数据 ({selected_label})",
             color_discrete_map=COLOR_MAP,
             render_mode="webgl"
         )
+        
+        # Apply the 'hv' shape to all status lines
+        # fig.update_traces(line=dict(width=3, shape='hv'))
         
         fig.update_xaxes(rangeslider_visible=True)
         fig.update_layout(
             height=700,
             hovermode="x unified",
-            legend_title="指标"
+            # Adjust Y-axis to show the -1 state clearly
+            yaxis=dict(
+                tickmode='array',
+                tickvals=[-1, 0, 1],
+                ticktext=['Disconnect (-1)', 'OFF (0)', 'ON (1)'],
+                range=[-1.1, 1.1]
+            )
         )
         
         st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.info("请选择至少一个指标。")
 
 elif 'df' in st.session_state:
     st.warning(f"设备 {st.session_state.get('current_display_name')} 在所选时间内无数据。")
