@@ -24,8 +24,10 @@ COLOR_MAP = {
 
 # Machine ID to MAC Mapping
 MACHINE_MAP = {
+    "DA-06": "AC:A7:04:13:1D:DC",
     "DA-08": "AC:A7:04:13:6B:60",
     "AGT-001": "AC:A7:04:29:82:94",
+
 }
 
 st.set_page_config(layout="wide")
