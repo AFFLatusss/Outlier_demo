@@ -31,7 +31,7 @@ MACHINE_MAP = {
 }
 
 st.set_page_config(layout="wide")
-st.title("三色灯数据监控样例")
+st.title("三色灯数据")
 
 db = InfluxManager(**INFLUX_CONFIG)
 
