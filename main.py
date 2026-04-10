@@ -8,6 +8,8 @@ scatter_plot_page = st.Page("scatter_plot.py", title="Scatter plot”")
 # esp_page = st.Page("esp.py", title="三色灯数据样例") 
 
 
-pg = st.navigation([outlier_page, merge_csv_page,scatter_plot_page, bpm_resign_search, esp_page])
+# pg = st.navigation([outlier_page, merge_csv_page,scatter_plot_page, bpm_resign_search, esp_page])
+pg = st.navigation([outlier_page, scatter_plot_page,])
+
 # st.set_page_config(page_title="Data manager")
 pg.run()
