@@ -2,7 +2,7 @@
 import streamlit as st
 from outlier_tabs import filter_outlier, search_outlier
 
-st.title("📊 离散点筛选")
+st.title("📊 Outlier Filter(Demo)")
 # st.set_page_config(page_title="离散点筛选", layout="wide")
 st.markdown("""
     <style>
