@@ -51,6 +51,7 @@ def calc_outlier(basic_df, detail_df, circulate_no):
 
 
     # The criteria for identifying outliers
+    product_name = "LCG50PIS120E1B-3H"
     test_criteria = criteria.get(product_name)
     if not test_criteria:
         # return None, f"{product_name} 不需要挑选离散点，请检查文件！"
