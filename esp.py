@@ -27,9 +27,9 @@ MACHINE_MAP = {
     "DA-08": "AC:A7:04:13:1D:DC",
     "DA-06": "AC:A7:04:13:6B:60",
     "AGT-001": "AC:A7:04:29:82:94",
-    "AC:A7:04:13:FD:EC":"AC:A7:04:13:FD:EC"
-
-}
+    "AC:A7:04:13:FD:EC":"AC:A7:04:13:FD:EC",
+    "REFLOW-01":"E8:F6:0A:8A:40:04"
+}   
 
 st.set_page_config(layout="wide")
 st.title("三色灯数据")
