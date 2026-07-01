@@ -42,7 +42,9 @@ MACHINE_MAP = {
     "WB-12":"AC:A7:04:E0:F9:4C",
     "CLN-01":"AC:A7:04:E0:51:78",
     "CLN-02":"AC:A7:04:E0:F9:58",
+    "APLP-03":"AC:A7:04:E2:56:DC",
     
+
 }   
 
 st.set_page_config(layout="wide")
