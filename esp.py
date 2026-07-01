@@ -38,7 +38,9 @@ MACHINE_MAP = {
     "FT-011":"AC:A7:04:E1:0B:2C",
     "FT-013": "E8:F6:0A:8A:74:B4",
     "LZ-K-036":"AC:A7:04:E0:52:24",
-    "KD-01":"AC:A7:04:E2:49:58"
+    "KD-01":"AC:A7:04:E2:49:58",
+    "WB-12":"AC:A7:04:E0:F9:4C",
+    
 }   
 
 st.set_page_config(layout="wide")
