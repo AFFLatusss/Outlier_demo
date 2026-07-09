@@ -196,19 +196,19 @@ for signal in ["green", "yellow", "red"]:
 
 timeline_df = pd.DataFrame(timeline)
 # --------------------------------------------------------
-# Stacked Visualization (Shared X-Axis, Raw Status)
+# Stacked Visualization (Dedicated Lanes / Logic Analyzer View)
 # --------------------------------------------------------
 
-# 1. Create a subplot figure with 2 rows, sharing the X-axis
+# 1. 创建 4 行的子图，共享 X 轴
 fig = make_subplots(
-    rows=2, cols=1, 
+    rows=4, cols=1, 
     shared_xaxes=True,
-    vertical_spacing=0.05,
-    row_heights=[0.5, 0.5], 
-    subplot_titles=("Count Signal", "Raw Light Status (ON=1, OFF=0)")
+    vertical_spacing=0.03, # 缩小行间距，让它们看起来像一个整体的仪器屏幕
+    row_heights=[0.4, 0.2, 0.2, 0.2], # 分配高度比例
+    subplot_titles=("Machine Signals & Count", "", "", "") # 只在最上方留一个标题
 )
 
-# 2. Add the Count Line Chart to Row 1
+# 2. 将 Count 曲线放入第 1 行
 fig.add_trace(
     go.Scatter(
         x=df["_time"],
@@ -220,10 +220,12 @@ fig.add_trace(
     ),
     row=1, col=1
 )
+fig.update_yaxes(title_text="Count", row=1, col=1)
 
-# 3. Add the Raw Light Status as Step Charts to Row 2
+# 3. 将每个灯分配到专属的行 (第 2, 3, 4 行)
+row_idx = 2
 for light, color in LIGHT_COLOR.items():
-    col_name = light.lower()  # Matches your df columns: "red", "yellow", "green"
+    col_name = light.lower()
     
     fig.add_trace(
         go.Scatter(
@@ -231,24 +233,33 @@ for light, color in LIGHT_COLOR.items():
             y=df[col_name],
             mode="lines",
             name=light,
-            line_shape="hv",  # 'hv' creates a horizontal-then-vertical step chart
+            line_shape="hv",  # 保持阶梯图表
             line=dict(color=color, width=2),
-            fill="tozeroy",   # Fills the area under the step for high visibility
-            opacity=0.6,      # Slight transparency in case lights turn on simultaneously
+            fill="tozeroy",   # 向下填充颜色
+            opacity=0.8,      # 不再担心重叠，可以把透明度调高一点让颜色更鲜艳
             hovertemplate=f"<b>{light}</b><br>Time: %{{x}}<br>Status: %{{y}}<extra></extra>"
         ),
-        row=2, col=1
+        row=row_idx, col=1
     )
+    
+    # 锁定该灯专属 Y 轴的范围，并在左侧加上文字标签
+    fig.update_yaxes(
+        title_text=light,  # 在 Y 轴左侧显示 "Red", "Yellow", "Green"
+        range=[-0.1, 1.1], 
+        tickvals=[0, 1], 
+        ticktext=["OFF", "ON"], 
+        row=row_idx, col=1
+    )
+    
+    row_idx += 1
 
-# 4. Final Layout Adjustments
+# 4. 全局排版调整
 fig.update_layout(
-    height=550,
-    hovermode="x unified", # A single hover line across both subplots!
-    margin=dict(l=20, r=20, t=40, b=20)
+    height=650, # 稍微增加整体高度，防止 4 行显得拥挤
+    hovermode="x unified", # 核心！鼠标悬停时，一条竖线会贯穿 4 行，同时显示所有状态！
+    margin=dict(l=20, r=20, t=40, b=20),
+    showlegend=False # 因为 Y 轴已经有了标题，图例显得多余，直接隐藏掉让图表更宽
 )
 
-# Lock the Y-axis for the lights to strictly show 0 to 1 with a little padding
-fig.update_yaxes(range=[-0.1, 1.1], tickvals=[0, 1], ticktext=["OFF", "ON"], row=2, col=1)
-
-# Render in Streamlit
+# 渲染到 Streamlit
 st.plotly_chart(fig, use_container_width=True)
