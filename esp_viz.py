@@ -61,7 +61,7 @@ LIGHT_COLOR = {
 # --------------------------------------------------------
 
 st.set_page_config(layout="wide")
-st.title("🚦 Machine Signal Dashboard")
+st.title("三色灯")
 
 db = InfluxManager(**INFLUX_CONFIG)
 
@@ -74,17 +74,17 @@ with st.sidebar:
     st.header("Search")
 
     machine = st.selectbox(
-        "Machine",
+        "设备编码",
         list(MACHINE_MAP.keys())
     )
 
     time_label = st.selectbox(
-        "Time Range",
+        "时间范围",
         list(TIME_OPTIONS.keys()),
         index=1
     )
 
-    if st.button("Fetch Data", use_container_width=True):
+    if st.button("获取数据", use_container_width=True):
 
         mac = MACHINE_MAP[machine]
 
@@ -154,38 +154,7 @@ if df.empty:
 
 df = df.sort_values("_time")
 
-# --------------------------------------------------------
-# Current Status
-# --------------------------------------------------------
-
-latest = df.iloc[-1]
-
-c1, c2, c3, c4 = st.columns(4)
-
-with c1:
-    st.metric(
-        "🔴 Red",
-        "ON" if latest["red"] else "OFF"
-    )
-
-with c2:
-    st.metric(
-        "🟡 Yellow",
-        "ON" if latest["yellow"] else "OFF"
-    )
-
-with c3:
-    st.metric(
-        "🟢 Green",
-        "ON" if latest["green"] else "OFF"
-    )
-
-with c4:
-    st.metric(
-        "Count",
-        int(latest["count"])
-    )
-
+# 
 st.divider()
 # --------------------------------------------------------
 # Build Timeline Data
