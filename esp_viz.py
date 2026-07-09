@@ -195,9 +195,8 @@ for signal in ["green", "yellow", "red"]:
     timeline.extend(build_intervals(df, signal))
 
 timeline_df = pd.DataFrame(timeline)
-
 # --------------------------------------------------------
-# Stacked Visualization (Shared X-Axis)
+# Stacked Visualization (Shared X-Axis, Raw Status)
 # --------------------------------------------------------
 
 # 1. Create a subplot figure with 2 rows, sharing the X-axis
@@ -205,8 +204,8 @@ fig = make_subplots(
     rows=2, cols=1, 
     shared_xaxes=True,
     vertical_spacing=0.05,
-    row_heights=[0.6, 0.4], # Give a bit more height to the Count chart
-    subplot_titles=("Count Signal", "Machine Light Status")
+    row_heights=[0.5, 0.5], 
+    subplot_titles=("Count Signal", "Raw Light Status (ON=1, OFF=0)")
 )
 
 # 2. Add the Count Line Chart to Row 1
@@ -222,42 +221,34 @@ fig.add_trace(
     row=1, col=1
 )
 
-# 3. Add the Timeline (Gantt) to Row 2
-if not timeline_df.empty:
-    # To build a timeline in Graph Objects, we use horizontal bars.
-    # The 'base' is the start time, and 'x' is the duration in milliseconds.
-    timeline_df["Duration_ms"] = (timeline_df["Finish"] - timeline_df["Start"]).dt.total_seconds() * 1000
+# 3. Add the Raw Light Status as Step Charts to Row 2
+for light, color in LIGHT_COLOR.items():
+    col_name = light.lower()  # Matches your df columns: "red", "yellow", "green"
     
-    # Iterate through the colors to group them logically
-    for signal_type, color in LIGHT_COLOR.items():
-        signal_data = timeline_df[timeline_df["Signal"] == signal_type]
-        
-        if not signal_data.empty:
-            fig.add_trace(
-                go.Bar(
-                    base=signal_data["Start"],
-                    x=signal_data["Duration_ms"],
-                    y=signal_data["Signal"],
-                    orientation='h',
-                    marker_color=color,
-                    name=signal_type,
-                    showlegend=False,
-                    # Format hover text to show start and finish instead of raw duration
-                    customdata=signal_data[["Start", "Finish"]],
-                    hovertemplate="<b>%{y}</b><br>Start: %{customdata[0]}<br>Finish: %{customdata[1]}<extra></extra>"
-                ),
-                row=2, col=1
-            )
+    fig.add_trace(
+        go.Scatter(
+            x=df["_time"],
+            y=df[col_name],
+            mode="lines",
+            name=light,
+            line_shape="hv",  # 'hv' creates a horizontal-then-vertical step chart
+            line=dict(color=color, width=2),
+            fill="tozeroy",   # Fills the area under the step for high visibility
+            opacity=0.6,      # Slight transparency in case lights turn on simultaneously
+            hovertemplate=f"<b>{light}</b><br>Time: %{{x}}<br>Status: %{{y}}<extra></extra>"
+        ),
+        row=2, col=1
+    )
 
 # 4. Final Layout Adjustments
 fig.update_layout(
-    height=500,
-    hovermode="x unified",
+    height=550,
+    hovermode="x unified", # A single hover line across both subplots!
     margin=dict(l=20, r=20, t=40, b=20)
 )
 
-# Reverse the Y-axis for the timeline so it reads intuitively
-fig.update_yaxes(autorange="reversed", row=2, col=1)
+# Lock the Y-axis for the lights to strictly show 0 to 1 with a little padding
+fig.update_yaxes(range=[-0.1, 1.1], tickvals=[0, 1], ticktext=["OFF", "ON"], row=2, col=1)
 
 # Render in Streamlit
 st.plotly_chart(fig, use_container_width=True)
