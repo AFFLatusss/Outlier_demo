@@ -187,103 +187,77 @@ with c4:
     )
 
 st.divider()
-
 # --------------------------------------------------------
-# Count Chart
+# Build Timeline Data
 # --------------------------------------------------------
-
-count_fig = px.line(
-    df,
-    x="_time",
-    y="count",
-    markers=False
-)
-
-count_fig.update_layout(
-    title="Count Signal",
-    height=350,
-    hovermode="x unified"
-)
-
-count_fig.update_traces(
-    line=dict(width=2)
-)
-
-st.plotly_chart(
-    count_fig,
-    use_container_width=True
-)
-
-# --------------------------------------------------------
-# Timeline
-# --------------------------------------------------------
-
 timeline = []
-
 for signal in ["green", "yellow", "red"]:
     timeline.extend(build_intervals(df, signal))
 
 timeline_df = pd.DataFrame(timeline)
 
+# --------------------------------------------------------
+# Stacked Visualization (Shared X-Axis)
+# --------------------------------------------------------
+
+# 1. Create a subplot figure with 2 rows, sharing the X-axis
+fig = make_subplots(
+    rows=2, cols=1, 
+    shared_xaxes=True,
+    vertical_spacing=0.05,
+    row_heights=[0.6, 0.4], # Give a bit more height to the Count chart
+    subplot_titles=("Count Signal", "Machine Light Status")
+)
+
+# 2. Add the Count Line Chart to Row 1
+fig.add_trace(
+    go.Scatter(
+        x=df["_time"],
+        y=df["count"],
+        mode="lines",
+        name="Count",
+        line=dict(width=2, color="#1f77b4"),
+        hovertemplate="Time: %{x}<br>Count: %{y}<extra></extra>"
+    ),
+    row=1, col=1
+)
+
+# 3. Add the Timeline (Gantt) to Row 2
 if not timeline_df.empty:
+    # To build a timeline in Graph Objects, we use horizontal bars.
+    # The 'base' is the start time, and 'x' is the duration in milliseconds.
+    timeline_df["Duration_ms"] = (timeline_df["Finish"] - timeline_df["Start"]).dt.total_seconds() * 1000
+    
+    # Iterate through the colors to group them logically
+    for signal_type, color in LIGHT_COLOR.items():
+        signal_data = timeline_df[timeline_df["Signal"] == signal_type]
+        
+        if not signal_data.empty:
+            fig.add_trace(
+                go.Bar(
+                    base=signal_data["Start"],
+                    x=signal_data["Duration_ms"],
+                    y=signal_data["Signal"],
+                    orientation='h',
+                    marker_color=color,
+                    name=signal_type,
+                    showlegend=False,
+                    # Format hover text to show start and finish instead of raw duration
+                    customdata=signal_data[["Start", "Finish"]],
+                    hovertemplate="<b>%{y}</b><br>Start: %{customdata[0]}<br>Finish: %{customdata[1]}<extra></extra>"
+                ),
+                row=2, col=1
+            )
 
-    gantt = px.timeline(
-        timeline_df,
-        x_start="Start",
-        x_end="Finish",
-        y="Signal",
-        color="Signal",
-        color_discrete_map=LIGHT_COLOR
-    )
-
-    gantt.update_yaxes(
-        autorange="reversed"
-    )
-
-    gantt.update_layout(
-        title="Machine Light Timeline",
-        height=300,
-        showlegend=False,
-        hovermode="x"
-    )
-
-    st.plotly_chart(
-        gantt,
-        use_container_width=True
-    )
-
-# --------------------------------------------------------
-# Statistics
-# --------------------------------------------------------
-
-st.subheader("Statistics")
-
-duration = (
-    df["_time"].max() -
-    df["_time"].min()
-).total_seconds()
-
-cols = st.columns(4)
-
-for i, signal in enumerate(["green", "yellow", "red"]):
-
-    pct = round(df[signal].eq(1).mean() * 100, 2)
-
-    cols[i].metric(
-        f"{signal.capitalize()} %",
-        f"{pct}%"
-    )
-
-disconnect = round(
-    (
-        (df[["red", "yellow", "green"]] == -1)
-        .all(axis=1)
-        .mean()
-    ) * 100,
-    2
+# 4. Final Layout Adjustments
+fig.update_layout(
+    height=500,
+    hovermode="x unified",
+    margin=dict(l=20, r=20, t=40, b=20)
 )
 
-cols[3].metric(
-    "Disconnect %",
-    f"{disconnect}%"
-)
+# Reverse the Y-axis for the timeline so it reads intuitively
+fig.update_yaxes(autorange="reversed", row=2, col=1)
+
+# Render in Streamlit
+st.plotly_chart(fig, use_container_width=True)
