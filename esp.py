@@ -24,11 +24,15 @@ COLOR_MAP = {
 
 # Machine ID to MAC Mapping
 MACHINE_MAP = {
+    "DA-01":"AC:A7:04:E1:0A:48",
+    "DA-04": "AC:A7:04:E1:0E:BC",
     "DA-08": "AC:A7:04:13:1D:DC",
     "DA-06": "AC:A7:04:13:6B:60",
     "AGT-001": "AC:A7:04:29:82:94",
     "PRINT-02":"AC:A7:04:13:FD:EC",
     "REFLOW-01":"E8:F6:0A:8A:40:04",
+    "REFLOW-02":"AC:A7:04:E1:02:CC",
+    "REFLOW-04":"AC:A7:04:E2:62:48",
     "FT-001":"AC:A7:04:E2:69:6C",
     "FT-002":"AC:A7:04:E2:4B:04",
     "FT-003":"AC:A7:04:E2:46:8C",
